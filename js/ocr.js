@@ -1,19 +1,39 @@
 const OCR = (() => {
     async function fromCamera() {
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        video.srcObject = stream;
-        await new Promise(r => setTimeout(r, 500));
-        const ctx = canvas.getContext('2d');
-        canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480;
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        stream.getTracks().forEach(t => t.stop());
-        const data = canvas.toDataURL('image/png');
-        const worker = Tesseract.createWorker({ logger: m => console.log(m) });
-        await worker.load(); await worker.loadLanguage('eng+pol'); await worker.initialize('eng+pol');
-        const { data: { text } } = await worker.recognize(data);
-        await worker.terminate(); return text;
+        return new Promise(async (resolve, reject) => {
+            try {
+                const video = document.createElement('video');
+                video.autoplay = true;
+                video.playsInline = true;
+                video.style.display = 'none';
+                document.body.appendChild(video);
+
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+
+                await new Promise(r => video.onloadedmetadata = r);
+
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+
+                stream.getTracks().forEach(t => t.stop());
+                video.remove();
+
+                const { createWorker } = Tesseract;
+                const worker = await createWorker();
+                await worker.loadLanguage('eng');
+                await worker.initialize('eng');
+                const { data } = await worker.recognize(canvas);
+                await worker.terminate();
+
+                resolve(data.text);
+            } catch (err) {
+                reject(err);
+            }
+        });
     }
     return { fromCamera };
 })();
