@@ -1,0 +1,17 @@
+const CACHE_NAME = 'secure-notes-v1';
+const OFFLINE_URL = '/index.html';
+const STATIC_ASSETS = ['/', '/index.html', '/css/style.css', '/js/app.js', '/js/db.js', '/js/auth.js', '/js/ocr.js', '/js/speech.js', '/assets/icon-192.png', '/assets/icon-512.png'];
+self.addEventListener('install', e => {
+    e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS)));
+    self.skipWaiting();
+});
+self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+self.addEventListener('fetch', e => {
+    if (e.request.mode === 'navigate') {
+        e.respondWith(fetch(e.request).catch(() => caches.match(OFFLINE_URL)));
+        return;
+    }
+    e.respondWith(caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
+        return caches.open(CACHE_NAME).then(cache => { cache.put(e.request, res.clone()); return res; });
+    })));
+});
