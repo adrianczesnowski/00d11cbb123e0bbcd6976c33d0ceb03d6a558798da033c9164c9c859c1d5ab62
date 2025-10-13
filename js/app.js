@@ -8,7 +8,6 @@ const app = (() => {
     const noteTitle = document.getElementById('note-title');
     const noteBody = document.getElementById('note-body');
     const noteMeta = document.getElementById('note-meta');
-    const ocrPreview = document.getElementById('ocr-preview');
     const search = document.getElementById('search');
 
     let currentId = null;
@@ -133,14 +132,6 @@ const app = (() => {
         editor.classList.add('d-none');
         empty.classList.remove('d-none');
         await loadNotes();
-    });
-
-    // Ocr
-    document.getElementById('btn-ocr').addEventListener('click', async () => {
-        ocrPreview.textContent = 'Rozpoznawanie tekstu...';
-        const text = await OCR.fromCamera();
-        ocrPreview.textContent = 'Rozpoznano tekst: ' + text.substring(0, 100) + '...';
-        noteBody.value += '\n' + text;
     });
 
     // Speech

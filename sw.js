@@ -8,7 +8,6 @@ const STATIC_ASSETS = [
     './js/app.js',
     './js/db.js',
     './js/auth.js',
-    './js/ocr.js',
     './js/speech.js',
     './assets/icon-192.png',
     './assets/icon-256.png',
