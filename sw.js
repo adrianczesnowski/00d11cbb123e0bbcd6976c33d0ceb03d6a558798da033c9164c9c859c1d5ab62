@@ -11,6 +11,7 @@ const STATIC_ASSETS = [
     './js/ocr.js',
     './js/speech.js',
     './assets/icon-192.png',
+    './assets/icon-256.png',
     './assets/icon-512.png'
 ];
 
