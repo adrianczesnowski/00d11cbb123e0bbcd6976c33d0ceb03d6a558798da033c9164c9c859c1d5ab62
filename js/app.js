@@ -9,6 +9,7 @@ const app = (() => {
     const noteBody = document.getElementById('note-body');
     const noteMeta = document.getElementById('note-meta');
     const search = document.getElementById('search');
+    const btnSpeech = document.getElementById('btn-speech');
 
     let currentId = null;
 
@@ -135,15 +136,50 @@ const app = (() => {
     });
 
     // Speech
-    document.getElementById('btn-speech').addEventListener('click', () => {
-        if (!Speech.available()) {
-            alert('Rozpoznawanie mowy nie jest obsługiwane w tej przeglądarce.');
-            return;
-        }
-        Speech.start((text) => {
-            noteBody.value += ' ' + text;
+    if (!Speech.available()) {
+        btnSpeech.disabled = true;
+        btnSpeech.textContent = 'Dyktowanie niedostępne';
+    } else {
+        let isRecording = false;
+
+        const startDictation = () => {
+            if (isRecording) return;
+            isRecording = true;
+            btnSpeech.classList.add('btn-danger');
+            btnSpeech.classList.remove('btn-outline-secondary');
+            btnSpeech.textContent = 'Słucham...';
+
+            Speech.start(
+                (text) => {
+                    noteBody.value += text + ' ';
+                },
+                (error) => {
+                    alert('Nie udało się rozpocząć dyktowania. Sprawdź uprawnienia do mikrofonu.');
+                    console.error(error);
+                },
+                () => {
+                    stopDictation();
+                }
+            );
+        };
+
+        const stopDictation = () => {
+            if (!isRecording) return;
+            isRecording = false;
+            Speech.stop();
+            btnSpeech.classList.remove('btn-danger');
+            btnSpeech.classList.add('btn-outline-secondary');
+            btnSpeech.textContent = 'Dyktuj tekst';
+        };
+
+        btnSpeech.addEventListener('mousedown', startDictation);
+        btnSpeech.addEventListener('mouseup', stopDictation);
+        btnSpeech.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startDictation();
         });
-    });
+        btnSpeech.addEventListener('touchend', stopDictation);
+    }
 
     // Search
     search.addEventListener('input', async () => {
