@@ -13,12 +13,11 @@ const app = (() => {
 
     let currentId = null;
 
-    // Auth
     document.getElementById('btn-register').addEventListener('click', async () => {
         if (!window.PublicKeyCredential) {
             alert('Brak WebAuth');
             return;
-        }
+        } 
         const ok = await Auth.register();
         alert(ok ? 'Zarejestrowano!' : 'Nieudane.');
     });
@@ -43,7 +42,6 @@ const app = (() => {
         else alert('Zły kod PIN');
     });
 
-    // Logika
     function showApp() {
         authView.classList.add('d-none');
         appView.classList.remove('d-none');
@@ -135,7 +133,6 @@ const app = (() => {
         await loadNotes();
     });
 
-    // Speech
     if (!Speech.available()) {
         btnSpeech.disabled = true;
         btnSpeech.textContent = 'Dyktowanie niedostępne';
@@ -181,7 +178,6 @@ const app = (() => {
         btnSpeech.addEventListener('touchend', stopDictation);
     }
 
-    // Search
     search.addEventListener('input', async () => {
         const notes = await DB.getAll();
         const filtered = notes.filter(n => n.title.toLowerCase().includes(search.value.toLowerCase()));
