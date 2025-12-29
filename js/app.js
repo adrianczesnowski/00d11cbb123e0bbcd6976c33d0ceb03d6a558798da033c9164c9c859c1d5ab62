@@ -99,12 +99,15 @@ const app = (() => {
         }
     });
 
-    addClick('btn-show-register', () => {
+    aaddClick('btn-show-register', () => {
         ui.registerArea.classList.toggle('d-none');
         if (!ui.registerArea.classList.contains('d-none')) {
-            ui.btnLoginPinShow.scrollIntoView({
-                behavior: 'smooth'
-            });
+            setTimeout(() => {
+                ui.registerArea.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }, 100);
         }
     });
 
@@ -264,6 +267,9 @@ const app = (() => {
     async function openNote(id) {
         const n = await DB.getNote(id);
         if (!n) return;
+
+        resetEditor();
+
         ui.title.value = n.title;
         ui.body.value = n.body;
         ui.date.textContent = new Date(n.updated).toLocaleString();
@@ -273,7 +279,7 @@ const app = (() => {
         } else {
             ui.imgPreview.classList.add('d-none');
         }
-        resetEditor();
+
         showView('editor');
     }
 
