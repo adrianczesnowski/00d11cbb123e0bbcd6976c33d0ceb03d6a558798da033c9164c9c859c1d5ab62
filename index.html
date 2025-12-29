@@ -85,67 +85,69 @@
             </div>
         </header>
 
-        <section id="view-auth" class="d-flex flex-column justify-content-center align-items-center mt-4">
+        <section id="view-auth" class="d-flex flex-column justify-content-center align-items-center mt-3 pb-5">
 
-            <div class="text-center mb-5">
-                <img src="assets/icon-192.png" width="64" height="64" class="mb-3 rounded shadow-sm">
-                <h2 class="h3 fw-bold">Witaj w aplikacji PWA FajneNotatki</h2>
+            <div class="text-center mb-4">
+                <img src="assets/icon-192.png" width="50" height="50" class="mb-2 rounded shadow-sm">
+                <h2 class="h4 fw-bold">FajneNotatki</h2>
             </div>
 
-            <div class="card w-100 shadow-sm mb-4" style="max-width: 400px;">
-                <div class="card-body p-4 text-center">
-                    <h5 class="card-title mb-3">Mam już konto</h5>
+            <div class="card w-100 shadow-sm mb-4 border-primary" style="max-width: 400px;">
+                <div class="card-header bg-primary text-white text-center fw-bold">
+                    MAM JUŻ KONTO
+                </div>
+                <div class="card-body p-3 text-center">
+                    <p class="small text-muted mb-3">Wybierz metodę logowania:</p>
                     <div class="d-grid gap-2">
-                        <button id="btn-auth-biometrics" class="btn btn-primary btn-lg">
-                            Zaloguj (Biometria)
+                        <button id="btn-auth-biometrics" class="btn btn-outline-primary">
+                            Odcisk palca / Twarz
                         </button>
                         <button id="btn-auth-pin-login-show" class="btn btn-outline-secondary">
-                            Zaloguj PIN-em
+                            Kod PIN
                         </button>
                     </div>
 
-                    <div id="login-pin-area" class="mt-3 d-none">
+                    <div id="login-pin-area" class="mt-3 d-none bg-light p-2 rounded">
+                        <label class="small text-muted">Podaj PIN:</label>
                         <input id="login-pin-input" type="password" inputmode="numeric"
-                            class="form-control text-center mb-2" placeholder="Wpisz swój PIN">
-                        <button id="btn-auth-pin-submit" class="btn btn-success w-100">Zatwierdź PIN</button>
+                            class="form-control text-center mb-2" placeholder="****">
+                        <button id="btn-auth-pin-submit" class="btn btn-primary w-100 btn-sm">Zaloguj</button>
                     </div>
                 </div>
             </div>
 
             <div class="position-relative w-100 text-center mb-4" style="max-width: 300px;">
                 <hr>
-                <span
-                    class="position-absolute top-50 start-50 translate-middle bg-light px-2 text-muted small">LUB</span>
+                <span class="position-absolute top-50 start-50 translate-middle bg-light px-2 text-muted fw-bold"
+                    style="font-size: 0.8rem;">LUB UTWÓRZ NOWE</span>
             </div>
 
-            <div class="card w-100 border-0 bg-transparent" style="max-width: 400px;">
-                <div class="card-body p-0 text-center">
-                    <p class="mb-2 text-muted small">Pierwszy raz tutaj?</p>
-                    <button id="btn-show-register" class="btn btn-outline-primary w-100 fw-bold">
-                        Utwórz nowe konto
-                    </button>
+            <div class="card w-100 shadow-sm border-0 bg-white" style="max-width: 400px;">
+                <div class="card-body p-3">
+                    <h5 class="card-title text-center text-muted h6 mb-3">PIERWSZY RAZ TUTAJ?</h5>
 
-                    <div id="register-area" class="card mt-3 p-3 shadow-sm d-none bg-white">
-                        <h6 class="mb-3">Konfiguracja nowego urządzenia</h6>
+                    <div id="register-area">
                         <div class="mb-3">
-                            <label class="form-label small text-muted">1. Ustaw kod PIN (Awaryjny)</label>
-                            <input id="register-pin-input" type="number" inputmode="numeric"
-                                class="form-control text-center mb-2" placeholder="Np. 1234">
-                            <button id="btn-register-pin-save" class="btn btn-sm btn-secondary w-100">Zapisz
-                                PIN</button>
+                            <label class="form-label small fw-bold text-muted">1. Ustaw Twój PIN)</label>
+                            <div class="input-group">
+                                <input id="register-pin-input" type="number" inputmode="numeric" class="form-control"
+                                    placeholder="Np. 1234">
+                                <button id="btn-register-pin-save" class="btn btn-secondary">Zapisz</button>
+                            </div>
                         </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">2. Dodaj biometrię</label>
+                            <button id="btn-auth-register" class="btn btn-outline-info w-100 btn-sm">
+                                Kliknij, aby dodać odcisk palca
+                            </button>
+                        </div>
+
                         <hr>
-                        <div class="mb-1">
-                            <label class="form-label small text-muted">2. Dodaj biometrię (Opcjonalne)</label>
-                            <button id="btn-auth-register" class="btn btn-sm btn-outline-info w-100">
-                                Aktywuj odcisk palca / FaceID
-                            </button>
-                        </div>
-                        <div class="mt-3 text-end">
-                            <button id="btn-enter-app-fresh" class="btn btn-success w-100 py-2">
-                                Przejdź do aplikacji &rarr;
-                            </button>
-                        </div>
+
+                        <button id="btn-enter-app-fresh" class="btn btn-success w-100 py-3 fw-bold shadow-sm">
+                            WEJDŹ DO APLIKACJI
+                        </button>
                     </div>
                 </div>
             </div>

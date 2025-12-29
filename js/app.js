@@ -14,8 +14,6 @@ const app = (() => {
         loginPinArea: getEl('login-pin-area'),
         loginPinInput: getEl('login-pin-input'),
         btnLoginPinSubmit: getEl('btn-auth-pin-submit'),
-        btnShowRegister: getEl('btn-show-register'),
-        registerArea: getEl('register-area'),
         registerPinInput: getEl('register-pin-input'),
         btnRegisterPinSave: getEl('btn-register-pin-save'),
         btnRegisterBio: getEl('btn-auth-register'),
@@ -46,16 +44,14 @@ const app = (() => {
         const btnSettings = getEl('btn-go-settings');
         const btnBack = getEl('btn-go-list');
 
+        if (btnSettings) btnSettings.classList.add('d-none');
+        if (btnBack) btnBack.classList.add('d-none');
+
         if (viewName === 'list') {
             if (btnSettings) btnSettings.classList.remove('d-none');
-            if (btnBack) btnBack.classList.add('d-none');
             stopCamera();
         } else if (viewName === 'editor' || viewName === 'settings') {
-            if (btnSettings) btnSettings.classList.add('d-none');
             if (btnBack) btnBack.classList.remove('d-none');
-        } else {
-            if (btnSettings) btnSettings.classList.add('d-none');
-            if (btnBack) btnBack.classList.add('d-none');
         }
     }
 
@@ -73,20 +69,19 @@ const app = (() => {
     addClick('btn-auth-biometrics', async () => {
         try {
             const success = await Auth.login();
-            if (success) {
-                enterApp();
-            } else {
-                alert('Nie rozpoznano użytkownika. Jeśli to Twój pierwszy raz, kliknij "Utwórz nowe konto" na dole.');
-            }
+            if (success) enterApp();
+            else alert('Nie rozpoznano. Spróbuj PINu lub sprawdź sekcję "Nowe konto".');
         } catch (e) {
             console.error(e);
-            alert('Błąd logowania. Spróbuj PIN-u lub zarejestruj się.');
+            alert('Błąd biometrii. Użyj PINu.');
         }
     });
 
     addClick('btn-auth-pin-login-show', () => {
-        ui.loginPinArea.classList.remove('d-none');
-        ui.loginPinInput.focus();
+        if (ui.loginPinArea) {
+            ui.loginPinArea.classList.remove('d-none');
+            if (ui.loginPinInput) ui.loginPinInput.focus();
+        }
     });
 
     addClick('btn-auth-pin-submit', () => {
@@ -94,40 +89,31 @@ const app = (() => {
         if (Auth.checkPin(pin)) {
             enterApp();
         } else {
-            alert('Błędny PIN. Jeśli nie masz konta, zjedź niżej i utwórz je.');
+            alert('Błędny PIN.');
             ui.loginPinInput.value = '';
-        }
-    });
-
-    aaddClick('btn-show-register', () => {
-        ui.registerArea.classList.toggle('d-none');
-        if (!ui.registerArea.classList.contains('d-none')) {
-            setTimeout(() => {
-                ui.registerArea.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }, 100);
         }
     });
 
     addClick('btn-register-pin-save', () => {
         const pin = ui.registerPinInput.value;
-        if (pin.length < 4) return alert('PIN musi mieć minimum 4 cyfry.');
+        if (pin.length < 4) return alert('PIN musi mieć min. 4 cyfry.');
         Auth.setPin(pin);
-        alert('PIN zapisany! Możesz teraz używać go do logowania.');
+        alert('PIN zapisany! Zapamiętaj go.');
     });
 
     addClick('btn-auth-register', async () => {
-        if (!window.PublicKeyCredential) return alert('Twoje urządzenie nie wspiera biometrii (WebAuthn). Użyj PINu.');
+        if (!window.PublicKeyCredential) return alert('Brak obsługi biometrii na tym urządzeniu. Użyj tylko PINu.');
         const ok = await Auth.register();
-        if (ok) alert('Biometria dodana pomyślnie!');
+        if (ok) alert('Biometria dodana!');
         else alert('Nie udało się dodać biometrii.');
     });
 
     addClick('btn-enter-app-fresh', () => {
-        if (!localStorage.getItem('securenotes-pin') && !localStorage.getItem('webauthn-cred')) {
-            if (!confirm('Nie ustawiłeś PINu ani biometrii. Aplikacja nie będzie zabezpieczona. Kontynuować?')) return;
+        const hasPin = localStorage.getItem('securenotes-pin');
+        const hasBio = localStorage.getItem('webauthn-cred');
+
+        if (!hasPin && !hasBio) {
+            if (!confirm('UWAGA: Nie ustawiłeś PINu ani biometrii. Aplikacja nie będzie zabezpieczona. Wejść mimo to?')) return;
         }
         enterApp();
     });
@@ -151,7 +137,7 @@ const app = (() => {
         if (!ui.listContainer) return;
         ui.listContainer.innerHTML = '';
         if (!notes || !notes.length) {
-            ui.listContainer.innerHTML = '<div class="text-muted p-3 text-center">Brak notatek</div>';
+            ui.listContainer.innerHTML = '<div class="text-muted p-3 text-center">Brak notatek.</div>';
             return;
         }
         notes.sort((a, b) => b.updated - a.updated);
@@ -207,18 +193,6 @@ const app = (() => {
         }
     });
 
-    addClick('btn-full-reset', async () => {
-        if (!confirm("CZY NA PEWNO? Ta operacja usunie wszystkie dane.")) return;
-        try {
-            localStorage.clear();
-            await DB.clearAll();
-            alert("Wyczyszczono. Restart.");
-            window.location.reload();
-        } catch (e) {
-            alert("Błąd resetu");
-        }
-    });
-
     addClick('btn-camera', async () => {
         if (cameraStream) {
             stopCamera();
@@ -233,7 +207,7 @@ const app = (() => {
             });
             ui.video.srcObject = cameraStream;
         } catch (e) {
-            alert('Błąd kamery (HTTPS wymagany)');
+            alert('Błąd kamery (Wymagany HTTPS/Localhost)');
         }
     });
 
@@ -267,9 +241,7 @@ const app = (() => {
     async function openNote(id) {
         const n = await DB.getNote(id);
         if (!n) return;
-
         resetEditor();
-
         ui.title.value = n.title;
         ui.body.value = n.body;
         ui.date.textContent = new Date(n.updated).toLocaleString();
@@ -279,9 +251,20 @@ const app = (() => {
         } else {
             ui.imgPreview.classList.add('d-none');
         }
-
         showView('editor');
     }
+
+    addClick('btn-full-reset', async () => {
+        if (!confirm("Usunąć WSZYSTKO (dane i logowanie)?")) return;
+        try {
+            localStorage.clear();
+            await DB.clearAll();
+            alert("Wyczyszczono. Restart.");
+            window.location.reload();
+        } catch (e) {
+            alert("Błąd resetu");
+        }
+    });
 
     if (typeof Speech !== 'undefined' && Speech.available()) {
         let isRec = false;
@@ -301,12 +284,6 @@ const app = (() => {
             }
         });
     }
-
-    if (ui.search) ui.search.addEventListener('input', async (e) => {
-        const val = e.target.value.toLowerCase();
-        const notes = await DB.getAll();
-        renderList(notes.filter(n => (n.title + n.body).toLowerCase().includes(val)));
-    });
 
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', e => {
