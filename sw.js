@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fajne-notatki-cache';
+const CACHE_NAME = 'fajne-notatki-cahe-v2';
 const OFFLINE_URL = './index.html';
 const STATIC_ASSETS = [
     './',
