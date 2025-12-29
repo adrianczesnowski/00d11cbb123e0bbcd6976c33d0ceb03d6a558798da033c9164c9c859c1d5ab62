@@ -85,6 +85,21 @@ const app = (() => {
         showView('editor');
     });
 
+    addClick('btn-full-reset', async () => {
+        if (!confirm("CZY NA PEWNO? Ta operacja jest nieodwracalna.")) return;
+        if (!confirm("To usunie WSZYSTKIE notatki, PIN i ustawienia biometrii. Kontynuować?")) return;
+
+        try {
+            localStorage.clear();
+            await DB.clearAll();
+            alert("Aplikacja została wyczyszczona. Nastąpi restart.");
+            window.location.reload();
+        } catch (e) {
+            console.error(e);
+            alert("Wystąpił błąd podczas czyszczenia danych.");
+        }
+    });
+
     addClick('btn-save', async () => {
         const now = Date.now();
         let created = now;

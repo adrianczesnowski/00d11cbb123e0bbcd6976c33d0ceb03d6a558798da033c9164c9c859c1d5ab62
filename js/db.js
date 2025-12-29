@@ -52,5 +52,14 @@ const DB = (() => {
         return tx.complete;
     }
 
-    return { addNote, getAll, getNote, deleteNote };
+    async function clearAll() {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.deleteDatabase(dbName);
+            req.onsuccess = () => resolve();
+            req.onerror = () => reject();
+            req.onblocked = () => resolve();
+        });
+    }
+
+    return { addNote, getAll, getNote, deleteNote, clearAll };
 })();
