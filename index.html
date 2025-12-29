@@ -4,90 +4,185 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>FajneNotatki appka</title>
+    <title>FajneNotatki</title>
     <meta name="theme-color" content="#0d6efd">
     <link rel="manifest" href="manifest.json">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        body,
+        html {
+            height: 100%;
+        }
+
+        section {
+            min-height: 80vh;
+        }
+
+        #offline-indicator {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #dc3545;
+            color: white;
+            text-align: center;
+            padding: 8px;
+            z-index: 2000;
+            display: none;
+            font-size: 0.9rem;
+        }
+
+        .camera-wrapper {
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            display: none;
+            position: relative;
+        }
+
+        video {
+            width: 100%;
+            display: block;
+        }
+
+        .captured-image {
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: block;
+            border: 1px solid #ddd;
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 24px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+    </style>
 </head>
 
 <body class="bg-light">
-    <div class="container py-4">
-        <header class="d-flex align-items-center mb-4">
-            <img src="assets/icon-192.png" alt="logo" width="56" height="56" class="me-3">
-            <h1 class="h3 mb-0">FajneNotatki</h1>
+    <div id="offline-indicator">Brak połączenia z siecią.</div>
+
+    <div class="container py-3" style="max-width: 600px;">
+
+        <header class="d-flex align-items-center justify-content-between mb-3 sticky-top bg-light py-2"
+            style="z-index: 1000;">
+            <div class="d-flex align-items-center">
+                <img src="assets/icon-192.png" alt="logo" width="32" height="32" class="me-2 rounded">
+                <h1 class="h5 mb-0 fw-bold">FajneNotatki</h1>
+            </div>
+            <div>
+                <button id="btn-go-settings" class="btn btn-sm btn-outline-dark d-none">⚙️</button>
+                <button id="btn-go-list" class="btn btn-sm btn-outline-secondary d-none">← Wróć</button>
+            </div>
         </header>
-        <section id="auth-view" class="card p-3 mb-3">
-            <h2 class="h5">Odblokuj aplikację</h2>
-            <p id="auth-msg" class="text-muted">Użyj FaceID / TouchID lub PIN.</p>
-            <div class="d-flex gap-2">
-                <button id="btn-auth" class="btn btn-primary">Odblokuj biometrią</button>
-                <button id="btn-register" class="btn btn-outline-secondary">Zarejestruj się</button>
-                <button id="btn-fallback" class="btn btn-link ms-auto">Użyj PIN</button>
+
+        <section id="view-auth" class="card p-4 shadow-sm mt-5">
+            <div class="text-center mb-4">
+                <h2 class="h4">Witaj!</h2>
+                <p class="text-muted">Zaloguj się, aby zobaczyć swoje notatki.</p>
             </div>
-            <div id="pin-area" class="mt-3 d-none">
-                <input id="pin-input" class="form-control mb-2" placeholder="Wprowadź PIN">
+            <div class="d-grid gap-3">
+                <button id="btn-auth-biometrics" class="btn btn-primary btn-lg">Odblokuj</button>
+                <button id="btn-auth-pin-toggle" class="btn btn-link text-decoration-none">Użyj kodu PIN</button>
+            </div>
+
+            <div id="pin-area" class="mt-4 d-none">
+                <input id="pin-input" type="password" inputmode="numeric" class="form-control text-center mb-3"
+                    placeholder="Wpisz PIN">
                 <div class="d-flex gap-2">
-                    <button id="btn-pin-login" class="btn btn-success">Zaloguj przez kod PIN</button>
-                    <button id="btn-pin-set" class="btn btn-outline-secondary">Ustaw kod PIN</button>
+                    <button id="btn-auth-pin-login" class="btn btn-success flex-grow-1">Zaloguj</button>
+                    <button id="btn-auth-pin-set" class="btn btn-outline-secondary">Ustaw nowy</button>
+                </div>
+                <div class="mt-3 text-center">
+                    <button id="btn-auth-register" class="btn btn-sm btn-outline-info">Rejestracja</button>
                 </div>
             </div>
         </section>
-        <section id="app-view" class="d-none">
-            <div class="d-flex mb-3">
-                <input id="search" class="form-control me-2" placeholder="Szukaj notatek">
-                <button id="btn-new" class="btn btn-success">+ Nowa notatka</button>
-                <button id="btn-install" class="btn btn-outline-primary ms-2 d-none">Zainstaluj appke</button>
+
+        <section id="view-list" class="d-none">
+            <div class="mb-3">
+                <input id="search-input" class="form-control rounded-pill" placeholder="Szukaj notatek...">
             </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <div id="notes-list" class="list-group"></div>
+
+            <div id="install-alert"
+                class="alert alert-primary d-flex justify-content-between align-items-center d-none p-2">
+                <span class="small">Zainstaluj aplikację na telefonie!</span>
+                <button id="btn-install" class="btn btn-sm btn-light text-primary fw-bold">Instaluj</button>
+            </div>
+
+            <div id="notes-list-container" class="list-group shadow-sm mb-5">
+            </div>
+
+            <button id="btn-new-note"
+                class="btn btn-primary fab d-flex align-items-center justify-content-center">+</button>
+        </section>
+
+        <section id="view-editor" class="d-none">
+            <div class="card shadow-sm p-3">
+                <input id="note-title" class="form-control fw-bold border-0 fs-4 px-0 mb-1" placeholder="Tytuł notatki">
+                <small id="note-date" class="text-muted d-block mb-3 small">Nowa notatka</small>
+
+                <textarea id="note-body" class="form-control border-0 px-0 mb-3" rows="10"
+                    placeholder="Zacznij pisać..."></textarea>
+
+                <div class="mb-3">
+                    <img id="note-image-preview" class="captured-image d-none">
                 </div>
-                <div class="col-md-8">
-                    <div id="editor" class="card p-3 d-none">
-                        <div class="mb-2 d-flex justify-content-between">
-                            <input id="note-title" class="form-control me-2" placeholder="Tytuł notatki">
-                            <small id="note-meta" class="text-muted align-self-center">—</small>
-                        </div>
-                        <textarea id="note-body" class="form-control mb-2" rows="10"
-                            placeholder="Treść notatki"></textarea>
-                        <div class="d-flex gap-2">
-                            <button id="btn-save" class="btn btn-primary">Zapisz</button>
-                            <button id="btn-delete" class="btn btn-danger">Usuń</button>
-                            <button id="btn-speech" class="btn btn-outline-secondary">Dyktuj tekst</button>
-                        </div>
-                        
-                    </div>
-                    <div id="empty" class="card p-4 text-center text-muted">Wybierz lub stwórz notatkę aby zacząć.</div>
+
+                <div id="camera-interface" class="camera-wrapper mb-3 p-2">
+                    <video id="video-feed" autoplay playsinline></video>
+                    <button id="btn-take-photo" class="btn btn-light w-100 mt-2 fw-bold">Zrób zdjęcie</button>
                 </div>
+
+                <div class="border-top pt-3 d-flex gap-2 flex-wrap">
+                    <button id="btn-save" class="btn btn-primary flex-grow-1">Zapisz</button>
+                    <button id="btn-camera" class="btn btn-outline-dark">📷</button>
+                    <button id="btn-speech" class="btn btn-outline-secondary">🎤</button>
+                    <button id="btn-delete" class="btn btn-danger">🗑</button>
+                </div>
+            </div>
+            <canvas id="camera-canvas" class="d-none"></canvas>
+        </section>
+
+        <section id="view-settings" class="d-none">
+            <div class="card p-4 shadow-sm">
+                <h3 class="h5 mb-3">Ustawienia</h3>
+                <ul class="list-group list-group-flush mb-3">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Wersja</span>
+                        <span class="text-muted">2.0 (Tabs)</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Baza danych</span>
+                        <span class="badge bg-success">IndexedDB</span>
+                    </li>
+                </ul>
+                <button class="btn btn-outline-danger w-100"
+                    onclick="alert('To tylko atrapa funkcji czyszczenia.')">Usuń wszystkie dane</button>
             </div>
         </section>
+
     </div>
-    <video id="video" autoplay playsinline class="d-none"></video>
-    <canvas id="canvas" class="d-none"></canvas>
-    <script src="https://cdn.jsdelivr.net/npm/idb@7/build/iife/index-min.js"></script>
+
     <script src="js/db.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/speech.js"></script>
     <script src="js/app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').then(() => console.log('SW registered'));
+            navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+                .then(() => console.log('SW Registered'))
+                .catch(console.error);
         }
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('btn-install').classList.remove('d-none');
-        });
-        document.getElementById('btn-install').addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-            deferredPrompt.prompt();
-            await deferredPrompt.userChoice;
-            deferredPrompt = null;
-            document.getElementById('btn-install').classList.add('d-none');
-        });
     </script>
 </body>
 
